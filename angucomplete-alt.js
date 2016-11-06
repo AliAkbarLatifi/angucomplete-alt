@@ -576,35 +576,40 @@
       function processResults(responseData, str) {
         var i, description, image, text, formattedText, formattedDesc;
 
-        if (responseData && responseData.length > 0) {
-          scope.results = [];
+        if (responseData) {
+          if (angular.isArray(responseData) && responseData.length > 0) {
+            scope.results = [];
 
-          for (i = 0; i < responseData.length; i++) {
-            if (scope.titleField && scope.titleField !== '') {
-              text = formattedText = extractTitle(responseData[i]);
+            for (i = 0; i < responseData.length; i++) {
+              if (scope.titleField && scope.titleField !== '') {
+                text = formattedText = extractTitle(responseData[i]);
+              }
+
+              description = '';
+              if (scope.descriptionField) {
+                description = formattedDesc = extractValue(responseData[i], scope.descriptionField);
+              }
+
+              image = '';
+              if (scope.imageField) {
+                image = extractValue(responseData[i], scope.imageField);
+              }
+
+              if (scope.matchClass) {
+                formattedText = findMatchString(text, str);
+                formattedDesc = findMatchString(description, str);
+              }
+
+              scope.results[scope.results.length] = {
+                title: formattedText,
+                description: formattedDesc,
+                image: image,
+                originalObject: responseData[i]
+              };
             }
-
-            description = '';
-            if (scope.descriptionField) {
-              description = formattedDesc = extractValue(responseData[i], scope.descriptionField);
-            }
-
-            image = '';
-            if (scope.imageField) {
-              image = extractValue(responseData[i], scope.imageField);
-            }
-
-            if (scope.matchClass) {
-              formattedText = findMatchString(text, str);
-              formattedDesc = findMatchString(description, str);
-            }
-
-            scope.results[scope.results.length] = {
-              title: formattedText,
-              description: formattedDesc,
-              image: image,
-              originalObject: responseData[i]
-            };
+          }
+          else if(angular.isObject(responseData)) {
+            scope.results = [responseData];
           }
 
         } else {
